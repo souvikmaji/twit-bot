@@ -5,7 +5,7 @@ var config = require('./config');
 var T = new Twit(config);
 
 twitIt();
-setInterval(twitIt, 1000*20);
+setInterval(twitIt, 1000*60*30);
 
 function twitIt() {
     request.get('https://got-quotes.herokuapp.com/quotes',response);
