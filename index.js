@@ -1,36 +1,56 @@
-var Twit = require('twit');
-var request = require('request');
-var config = require('./config');
+const Twit = require("twit");
+const request = require("request");
+const config = require("./config");
 
-var T = new Twit(config);
+const T = new Twit(config);
 
-twitIt();
-setInterval(twitIt, 1000 * 60 * 30);
+main();
 
-function twitIt() {
-  request.get('https://got-quotes.herokuapp.com/quotes', response);
+function getContent () {
+    const options = {
+        url: "https://got-quotes.herokuapp.com/quotes",
+    };
 
-  function response(err, res, body) {
-    if (err) {
-      console.log('Error getting quote: ', err);
-    } else if (res.statusCode !== 200) {
-      console.log('Error proccessing request: ', res);
-    } else {
-      var quote = JSON.parse(body).quote;
-      var char = JSON.parse(body).character.replace(/\s/g, '');
-      var twit = {
-        status: quote + ' #gameofthrones'
-      };
-      console.log(char);
-      T.post('statuses/update', twit, twitted);
-    }
-  }
+    return new Promise(function (resolve, reject) {
+        request.get(options, function (err, resp, body) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(JSON.parse(body));
+            }
+        });
+    });
+}
 
-  function twitted(err, data, response) {
-    if (err) {
-      console.log('Something went wrong:', err);
-    } else {
-      console.log(data.text);
-    }
-  }
+function postTwit (status) {
+    const twit = {
+        status: status,
+    };
+
+    return new Promise(function (resolve, reject) {
+        T.post("statuses/update", twit, function (err, data, response) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data.text);
+            }
+        });
+    });
+}
+
+function main () {
+    const contentPromise = getContent(postTwit);
+    contentPromise.then(function (content) {
+        const quote = content.quote;
+        const character = content.character.replace(/\s/g, "");
+
+        const twitted = postTwit(quote + " #gameofthrones" + " #" + character);
+        twitted.then(function (status) {
+            console.log(status);
+        }, function (err) {
+            console.log("Something went wrong posting the twit: ", err);
+        });
+    }, function (err) {
+        console.log("Error getting content: ", err);
+    });
 }
