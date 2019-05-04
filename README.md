@@ -13,6 +13,8 @@ Twitter bot that posts game of throne quotes in twitter.
 
 - Register your app and get OAuth credentials from [twiiter](https://apps.twitter.com/app/new)
 
+- Save the credentials in `config.js`, or use the environment variables specified there.
+
 - Start the application.
 ```bash
   npm start
