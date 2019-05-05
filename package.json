@@ -1,5 +1,5 @@
 {
-  "name": "twitter-bot",
+  "name": "got-bot",
   "version": "2.1.0",
   "description": "post game of thrones related stuff on twitter",
   "main": "index.js",
