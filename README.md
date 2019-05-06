@@ -1,7 +1,7 @@
 # GOT-BOT (Game of Thrones Twitter Bot)
 ![Twitter Follow](https://img.shields.io/twitter/follow/QuotebotMaster.svg?label=Followers)
 
-Twitter bot that posts game of throne quotes in twitter.
+Twitter bot that posts game of throne memes on twitter.
 
 ## To Run:
 
