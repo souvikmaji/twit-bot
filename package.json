@@ -1,6 +1,6 @@
 {
   "name": "got-bot",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "post game of thrones related stuff on twitter",
   "main": "index.js",
   "scripts": {
