@@ -74,24 +74,26 @@ function postTwit (content) {
                     var altText = content.title;
                     var metaParams = { media_id: mediaIdStr, alt_text: { text: altText, }, };
 
-                    T.post("media/metadata/create", metaParams, function (err, data, response) {
-                        if (!err) {
-                        // now we can reference the media and post a tweet (media will attach to the tweet)
+                    T.post("media/metadata/create", metaParams)
+                        .catch(function (err) {
+                            console.log("error creating media meta data");
+                            reject(err);
+                        })
+                        .then(function () {
+                            // now we can reference the media and post a tweet (media will attach to the tweet)
                             var params = { status: content.title + " #gameofthrones",
                                 media_ids: [ mediaIdStr, ], };
 
-                            T.post("statuses/update", params, function (err, data, response) {
-                                if (err) {
+                            T.post("statuses/update", params)
+                                .catch(function (err) {
+                                    console.log("error in status update");
                                     reject(err);
-                                } else {
+                                })
+                                .then(function (result) {
                                     fs.unlinkSync(PATH);
-                                    resolve(data.text);
-                                }
-                            });
-                        } else {
-                            reject(err);
-                        }
-                    });
+                                    resolve(result.data.text);
+                                });
+                        });
                 }
             });
         }, function (err) {
