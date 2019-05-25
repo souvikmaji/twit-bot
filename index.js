@@ -28,10 +28,10 @@ function saveImage (url, path) {
     };
 
     return rp(options).then((body) => {
-        return fs.writeFile(path, body)
-            .catch((err) => {
-                return err;
-            });
+        return fs.writeFile(path, body).catch((err) => {
+            console.log("error saving media in local storage");
+            return err;
+        });
     });
 }
 
@@ -64,23 +64,23 @@ function postTwit (content) {
                     const mediaIdStr = data.media_id_string;
                     const metaParams = { media_id: mediaIdStr, alt_text: { text: content.title, }, };
 
-                    return T.post("media/metadata/create", metaParams)
-                        .then(() => {
-                            // now we can reference the media and post a tweet (media will attach to the tweet)
-                            const params = { status: content.title + " #gameofthrones",
-                                media_ids: [ mediaIdStr, ], };
+                    return T.post("media/metadata/create", metaParams).then(() => {
+                        // now we can reference the media and post a tweet (media will attach to the tweet)
+                        const params = { status: content.title + " #gameofthrones",
+                            media_ids: [ mediaIdStr, ], };
 
-                            return T.post("statuses/update", params);
-                        }).then((result) => {
-                            fs.unlink(PATH).catch((err) => {
-                                reject(err);
-                            });
-
-                            resolve(result.data.text);
-                        }).catch((err) => {
-                            console.log("error in status update");
+                        return T.post("statuses/update", params);
+                    }).then((result) => {
+                        fs.unlink(PATH).catch((err) => {
+                            console.log("error removing media from local storage");
                             reject(err);
                         });
+
+                        resolve(result.data.text);
+                    }).catch((err) => {
+                        console.log("error in status update");
+                        reject(err);
+                    });
                 }
             });
         }).catch((err) => {
