@@ -1,8 +1,8 @@
 const Twit = require("twit");
-const request = require("request").defaults({ encoding: null, });
+var rp = require("request-promise").defaults({ encoding: null, });
 const config = require("./config");
 
-const fs = require("fs");
+const fs = require("fs").promises;
 const path = require("path");
 
 const T = new Twit(config);
@@ -14,15 +14,11 @@ function getContent () {
         url: "https://www.reddit.com/r/freefolk/hot.json",
     };
 
-    return new Promise(function (resolve, reject) {
-        request.get(options, function (err, resp, body) {
-            if (err) {
-                console.log("Error getting content: ");
-                reject(err);
-            } else {
-                resolve(parseSubReddit(JSON.parse(body)));
-            }
-        });
+    return rp(options).then((body) => {
+        return parseSubReddit(JSON.parse(body));
+    }).catch(function (err) {
+        console.log("Error getting content: ");
+        return err;
     });
 }
 
@@ -30,20 +26,12 @@ function saveImage (url, path) {
     const options = {
         url: url,
     };
-    return new Promise(function (resolve, reject) {
-        request.get(options, function (err, resp, body) {
-            if (err) {
-                reject(err);
-            } else {
-                fs.writeFile(path, body, function (err) {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve();
-                    }
-                });
-            }
-        });
+
+    return rp(options).then(function (body) {
+        return fs.writeFile(path, body)
+            .catch(function (err) {
+                return err;
+            });
     });
 }
 
@@ -84,7 +72,10 @@ function postTwit (content) {
 
                             return T.post("statuses/update", params);
                         }).then(function (result) {
-                            fs.unlinkSync(PATH);
+                            fs.unlink(PATH).catch(function (err) {
+                                reject(err);
+                            });
+
                             resolve(result.data.text);
                         }).catch(function (err) {
                             console.log("error in status update");
@@ -99,9 +90,7 @@ function postTwit (content) {
 }
 
 function main () {
-    const contentPromise = getContent(postTwit);
-    contentPromise.then(function (content) {
-        // parse content to twit
+    getContent().then(function (content) {
         return postTwit(content);
     }).then(function (status) {
         console.log(status);
