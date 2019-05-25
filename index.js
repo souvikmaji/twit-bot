@@ -1,5 +1,5 @@
 const Twit = require("twit");
-var rp = require("request-promise").defaults({ encoding: null, });
+const rp = require("request-promise").defaults({ encoding: null, });
 const config = require("./config");
 
 const fs = require("fs").promises;
@@ -16,7 +16,7 @@ function getContent () {
 
     return rp(options).then((body) => {
         return parseSubReddit(JSON.parse(body));
-    }).catch(function (err) {
+    }).catch((err) => {
         console.log("Error getting content: ");
         return err;
     });
@@ -27,9 +27,9 @@ function saveImage (url, path) {
         url: url,
     };
 
-    return rp(options).then(function (body) {
+    return rp(options).then((body) => {
         return fs.writeFile(path, body)
-            .catch(function (err) {
+            .catch((err) => {
                 return err;
             });
     });
@@ -51,50 +51,50 @@ function parseSubReddit (response) {
 }
 
 function postTwit (content) {
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
         const localname = "downloaded_image";
         const PATH = path.join(__dirname, localname);
 
-        return saveImage(content.url, PATH).then(function () {
-            T.postMediaChunked({ file_path: PATH, }, function (err, data, response) {
+        return saveImage(content.url, PATH).then(() => {
+            T.postMediaChunked({ file_path: PATH, }, (err, data, response) => {
                 if (err) {
                     console.log("upload error");
                     reject(err);
                 } else {
-                    var mediaIdStr = data.media_id_string;
-                    var metaParams = { media_id: mediaIdStr, alt_text: { text: content.title, }, };
+                    const mediaIdStr = data.media_id_string;
+                    const metaParams = { media_id: mediaIdStr, alt_text: { text: content.title, }, };
 
                     return T.post("media/metadata/create", metaParams)
-                        .then(function () {
+                        .then(() => {
                             // now we can reference the media and post a tweet (media will attach to the tweet)
-                            var params = { status: content.title + " #gameofthrones",
+                            const params = { status: content.title + " #gameofthrones",
                                 media_ids: [ mediaIdStr, ], };
 
                             return T.post("statuses/update", params);
-                        }).then(function (result) {
-                            fs.unlink(PATH).catch(function (err) {
+                        }).then((result) => {
+                            fs.unlink(PATH).catch((err) => {
                                 reject(err);
                             });
 
                             resolve(result.data.text);
-                        }).catch(function (err) {
+                        }).catch((err) => {
                             console.log("error in status update");
                             reject(err);
                         });
                 }
             });
-        }).catch(function (err) {
+        }).catch((err) => {
             reject(err);
         });
     });
 }
 
 function main () {
-    getContent().then(function (content) {
+    getContent().then((content) => {
         return postTwit(content);
-    }).then(function (status) {
+    }).then((status) => {
         console.log(status);
-    }).catch(function (err) {
+    }).catch((err) => {
         console.log(err);
     });
 }
