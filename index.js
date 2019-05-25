@@ -46,16 +46,18 @@ function saveImage (url, path) {
     });
 }
 
+function randomIndex (upperLimit) {
+    return Math.floor(Math.random() * (upperLimit - 1));
+}
+
 function parseSubReddit (response) {
     let posts = response.data.children;
-    for (let post of posts.reverse()) {
-        if (!post.data.is_self) {
-            let data = {
-                title: post.data.title,
-                url: post.data.url,
-            };
-            return data;
-        }
+    for (let i = randomIndex(posts.length), post = posts[i]; !posts[i].data.is_self;) {
+        let data = {
+            title: post.data.title,
+            url: post.data.url,
+        };
+        return data;
     }
 }
 
