@@ -19,21 +19,22 @@ async function getContent () {
         return parseSubReddit(JSON.parse(body));
     } catch (err) {
         console.log("Error getting content: ");
-        return err;
+        throw err;
     }
 }
 
-function saveImage (url, path) {
+async function saveImage (url, path) {
     const options = {
         url: url,
     };
 
-    return request(options).then((body) => {
-        return fs.writeFile(path, body).catch((err) => {
-            console.log("error saving media in local storage");
-            return err;
-        });
-    });
+    try {
+        let body = await request(options);
+        await fs.writeFile(path, body);
+    } catch (err) {
+        console.log("error saving media in local storage");
+        throw err;
+    }
 }
 
 function randomIndex (upperLimit) {
