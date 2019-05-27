@@ -1,5 +1,5 @@
 const Twit = require("twit");
-const rp = require("request-promise").defaults({ encoding: null, });
+const request = require("request-promise").defaults({ encoding: null, });
 const config = require("./config");
 
 const fs = require("fs").promises;
@@ -9,17 +9,18 @@ const T = new Twit(config);
 
 main();
 
-function getContent () {
+async function getContent () {
     const options = {
         url: "https://www.reddit.com/r/freefolk/hot.json",
     };
 
-    return rp(options).then((body) => {
+    try {
+        let body = await request(options);
         return parseSubReddit(JSON.parse(body));
-    }).catch((err) => {
+    } catch (err) {
         console.log("Error getting content: ");
         return err;
-    });
+    }
 }
 
 function saveImage (url, path) {
@@ -27,7 +28,7 @@ function saveImage (url, path) {
         url: url,
     };
 
-    return rp(options).then((body) => {
+    return request(options).then((body) => {
         return fs.writeFile(path, body).catch((err) => {
             console.log("error saving media in local storage");
             return err;
