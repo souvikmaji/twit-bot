@@ -5,7 +5,7 @@ const config = require("./config");
 const fs = require("fs").promises;
 const path = require("path");
 
-const T = new Twit(config);
+const T = new Twit(config.twitterConfig);
 
 main();
 
